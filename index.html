@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="te" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sakhavaram Voter Search | శాఖవరం ఓటరు జాబితా 2026</title>
+  <meta name="description" content="Search voter details for Sakhavaram Gram Panchayat 2026 elections. Find voter ID, name, age and house details." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Telugu:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Background decorations -->
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+  <div class="bg-orb bg-orb-3"></div>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo-area">
+        <div class="logo-icon">🗳️</div>
+        <div class="logo-text">
+          <h1 class="site-title">శాఖవరం ఓటరు జాబితా</h1>
+          <p class="site-subtitle">Sakhavaram Gram Panchayat — General Elections 2026</p>
+        </div>
+      </div>
+      <div class="header-stats" id="headerStats">
+        <div class="stat-chip">
+          <span class="stat-num" id="totalVotersCount">—</span>
+          <span class="stat-label">Total Voters</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main content -->
+  <main class="main-container">
+
+    <!-- Search Card -->
+    <section class="search-card" aria-label="Voter Search">
+      <div class="search-card-inner">
+        <div class="search-heading">
+          <div class="search-icon-wrap">🔍</div>
+          <div>
+            <h2 class="search-title">Search Voter Details</h2>
+            <p class="search-desc">Search by name (Telugu or English), Voter ID, or house number</p>
+          </div>
+        </div>
+
+        <div class="search-row">
+          <div class="search-input-wrap">
+            <span class="search-input-icon">🔎</span>
+            <input
+              type="text"
+              id="searchInput"
+              class="search-input"
+              placeholder="Enter voter name, ID (e.g. YDR1166966), or house no…"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <button class="clear-btn" id="clearBtn" aria-label="Clear search" title="Clear">✕</button>
+          </div>
+          <button class="search-btn" id="searchBtn">
+            <span>Search</span>
+            <span class="btn-icon">→</span>
+          </button>
+        </div>
+
+        <!-- Filter Row -->
+        <div class="filter-row">
+          <label class="filter-label">Filter by:</label>
+          <div class="filter-chips">
+            <button class="filter-chip active" data-filter="all" id="filterAll">All</button>
+            <button class="filter-chip" data-filter="male" id="filterMale">👨 Male</button>
+            <button class="filter-chip" data-filter="female" id="filterFemale">👩 Female</button>
+          </div>
+          <div class="age-filter">
+            <label class="filter-label" for="ageMin">Age:</label>
+            <input type="number" id="ageMin" class="age-input" placeholder="Min" min="18" max="120" />
+            <span class="age-sep">–</span>
+            <input type="number" id="ageMax" class="age-input" placeholder="Max" min="18" max="120" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Results Info Bar -->
+    <div class="results-bar" id="resultsBar" style="display:none">
+      <span class="results-count" id="resultsCount"></span>
+      <button class="export-btn" id="exportBtn">⬇ Export Results (CSV)</button>
+    </div>
+
+    <!-- Results Grid -->
+    <section class="results-section" id="resultsSection" aria-live="polite">
+      <!-- Welcome State -->
+      <div class="state-container" id="stateWelcome">
+        <div class="state-icon">🗳️</div>
+        <h3 class="state-title">Sakhavaram Voter Roll 2026</h3>
+        <p class="state-desc">Type a voter's name, ID, or house number above to search the voter list.</p>
+        <div class="quick-actions">
+          <button class="quick-btn" onclick="showAll()">📋 Browse All Voters</button>
+          <a class="quick-btn" href="voters.xlsx" download>📊 Download Excel</a>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div class="state-container" id="stateLoading" style="display:none">
+        <div class="loader-ring"><div></div><div></div><div></div><div></div></div>
+        <p class="state-desc">Searching…</p>
+      </div>
+
+      <!-- No Results State -->
+      <div class="state-container" id="stateEmpty" style="display:none">
+        <div class="state-icon">😕</div>
+        <h3 class="state-title">No results found</h3>
+        <p class="state-desc">Try a different spelling or search by Voter ID.</p>
+      </div>
+
+      <!-- Results -->
+      <div class="voter-grid" id="voterGrid"></div>
+
+      <!-- Pagination -->
+      <div class="pagination" id="pagination"></div>
+    </section>
+  </main>
+
+  <!-- Voter Detail Modal -->
+  <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-label="Voter Details" style="display:none">
+    <div class="modal-card" id="modalCard">
+      <button class="modal-close" id="modalClose" aria-label="Close">✕</button>
+      <div class="modal-header">
+        <div class="modal-avatar" id="modalAvatar">?</div>
+        <div class="modal-header-info">
+          <h3 class="modal-name" id="modalName">—</h3>
+          <p class="modal-id" id="modalId">—</p>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="detail-label">Voter ID</span>
+            <span class="detail-value" id="dVoterId">—</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Serial No.</span>
+            <span class="detail-value" id="dSerial">—</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Age</span>
+            <span class="detail-value" id="dAge">—</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Gender</span>
+            <span class="detail-value" id="dGender">—</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Relation</span>
+            <span class="detail-value" id="dRelationType">—</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Relation Name</span>
+            <span class="detail-value" id="dRelationName">—</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">House No.</span>
+            <span class="detail-value" id="dHouse">—</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Part Serial</span>
+            <span class="detail-value" id="dPartSerial">—</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-action-btn" onclick="printVoter()">🖨 Print</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <p>Sakhavaram Gram Panchayat Voter Roll 2026 &bull; Prakasam District, Andhra Pradesh</p>
+    <p>Data sourced from official voter list &bull; For official use</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
