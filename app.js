@@ -214,14 +214,28 @@ function renderVoterCard(v, idx, query) {
     : '';
   const relBadge = v.relation_type
     ? `<span class="relation-badge">${v.relation_type}</span>` : '';
-  const relName = v.relation_name ? highlight(v.relation_name, query) : '—';
+
+  // Use English display name as primary; fallback to Telugu if no EN available
+  const displayName = v.voter_name_display || v.voter_name || '—';
+  const displayRelName = v.relation_name_display || v.relation_name || '—';
+
+  // Highlight: match against English display name OR the Telugu original
+  const highlightedName    = highlight(displayName, query) || highlight(v.voter_name, query) || '—';
+  const highlightedRelName = highlight(displayRelName, query) || highlight(v.relation_name, query) || '—';
+
+  // Telugu shown as a subtle subtitle only if different from display name
+  const teluguSubtitle = v.voter_name
+    ? `<span class="voter-card-telugu">${escapeHtml(v.voter_name)}</span>` : '';
+  const teluguRelSubtitle = v.relation_name
+    ? `<span class="voter-card-telugu">${escapeHtml(v.relation_name)}</span>` : '';
 
   return `
-    <div class="voter-card" role="button" tabindex="0" aria-label="View details for ${escapeHtml(v.voter_name)}">
+    <div class="voter-card" role="button" tabindex="0" aria-label="View details for ${escapeHtml(displayName)}">
       <div class="voter-card-top">
         <div class="voter-avatar ${avatarClass}">${avatarEmoji}</div>
         <div class="voter-card-name-wrap">
-          <div class="voter-card-name">${highlight(v.voter_name, query) || '—'}</div>
+          <div class="voter-card-name">${highlightedName}</div>
+          ${teluguSubtitle}
           <span class="voter-card-id">${highlight(v.voter_id, query) || '—'}</span>
         </div>
       </div>
@@ -244,7 +258,8 @@ function renderVoterCard(v, idx, query) {
         </div>
         <div class="voter-card-relation">
           ${relBadge}
-          <span class="relation-name">${relName}</span>
+          <span class="relation-name">${highlightedRelName}</span>
+          ${teluguRelSubtitle}
         </div>
       </div>
     </div>
@@ -306,16 +321,16 @@ function openModal(voter) {
 
   modalAvatar.textContent = avatarEmoji;
   modalAvatar.className = `modal-avatar ${avatarClass}`;
-  modalName.textContent = voter.voter_name || '—';
+
+  // Primary name: English display name
+  const displayName = voter.voter_name_display || voter.voter_name || '—';
+  modalName.textContent = displayName;
   modalId.textContent = voter.voter_id || '—';
 
-  // Show English transliteration subtitle in modal (first variant only)
+  // Telugu subtitle in modal
   const modalNameEn = document.getElementById('modalNameEn');
   if (modalNameEn) {
-    const enVariants = (voter.voter_name_en || '').split(' ');
-    // Pick the longest continuous word-group that resembles the first transliteration
-    const firstVariant = (voter.voter_name_en || '').split(' ').slice(0, 3).join(' ');
-    modalNameEn.textContent = firstVariant ? `(${toTitleCase(firstVariant)})` : '';
+    modalNameEn.textContent = voter.voter_name ? voter.voter_name : '';
   }
 
   dVoterId.textContent = voter.voter_id || '—';
@@ -323,7 +338,13 @@ function openModal(voter) {
   dAge.textContent = voter.age ? `${voter.age} years` : '—';
   dGender.textContent = voter.gender || '—';
   dRelationType.textContent = voter.relation_type || '—';
-  dRelationName.textContent = voter.relation_name || '—';
+
+  // Relation name: English + Telugu in parentheses
+  const relDisplay = voter.relation_name_display || voter.relation_name || '—';
+  const relTelugu  = voter.relation_name && voter.relation_name_display
+    ? ` (${voter.relation_name})` : '';
+  dRelationName.textContent = relDisplay + relTelugu;
+
   dHouse.textContent = voter.house_number || '—';
   dPartSerial.textContent = voter.part_serial ? `Part ${voter.part_serial}` : '—';
 
@@ -331,6 +352,7 @@ function openModal(voter) {
   document.body.style.overflow = 'hidden';
   modalClose.focus();
 }
+
 
 function closeModal() {
   modalOverlay.style.display = 'none';
