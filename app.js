@@ -253,7 +253,7 @@ function renderVoterCard(v, idx, query) {
           <span class="detail-val">${highlight(v.house_number, query) || '—'}</span>
         </div>
         <div class="voter-card-detail">
-          <span class="detail-key">Serial</span>
+          <span class="detail-key">Serial No.</span>
           <span class="detail-val">${escapeHtml(v.full_serial) || '—'}</span>
         </div>
         <div class="voter-card-relation">
@@ -346,7 +346,7 @@ function openModal(voter) {
   dRelationName.textContent = relDisplay + relTelugu;
 
   dHouse.textContent = voter.house_number || '—';
-  dPartSerial.textContent = voter.part_serial ? `Part ${voter.part_serial}` : '—';
+  dPartSerial.textContent = voter.part_serial ? `#${voter.part_serial}` : '—';
 
   modalOverlay.style.display = 'flex';
   document.body.style.overflow = 'hidden';

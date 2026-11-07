@@ -17,10 +17,14 @@ OUTPUT    = "voters_raw.json"
 
 # --- Patterns ---
 # గ్రాా.పం.ఓ.జా.వ.సం . \xa0 <part_serial> \xa0
-# అ.ఓ.జా.వ.సం .<full_serial>
+# అ.ఓ.జా.వ.సం .109 - 26 - 1
+#   group(1) = voter seq no (part_serial: 1,2,3...)
+#   group(2) = ward no (109 for all — Kandukuri constituency)
+#   group(3) = part no within ward (24,25,26...)
+#   group(4) = voter serial within part (unique per part)
 BLOCK_SPLIT = re.compile(
     r'గ్రాా?\.పం\.ఓ\.జా\.వ\.సం\s*\.\s*[\xa0\s]*(\d+)[\xa0\s]*'
-    r'అ\.ఓ\.జా\.వ\.సం\s*\.?\s*([\d\-]+)'
+    r'అ\.ఓ\.జా\.వ\.సం\s*\.?\s*(\d+)\s*-\s*(\d+)\s*-\s*(\d+)'
 )
 VOTER_ID_PAT = re.compile(r'\b([A-Z]{3}\d{7})\b')
 
@@ -137,15 +141,18 @@ def extract_all() -> list[dict]:
             continue
 
         for i, m in enumerate(matches):
-            part_serial = m.group(1)
-            full_serial = m.group(2)
+            seq_no      = m.group(1)                    # 1, 2, 3 … 2208
+            ward_no     = m.group(2)                    # 109 (same for all)
+            part_no     = m.group(3)                    # 24 / 25 / 26
+            serial_in_part = m.group(4)                 # voter's serial within part
+            full_serial = f"{ward_no}-{part_no}-{serial_in_part}"  # e.g. 109-26-1
 
             # Block text: from after the serial header to next match (or end)
             block_start = m.end()
             block_end   = matches[i + 1].start() if i + 1 < len(matches) else len(text)
             block       = text[block_start:block_end]
 
-            voter = parse_block(part_serial, full_serial, block)
+            voter = parse_block(seq_no, full_serial, block)
             if voter:
                 voters.append(voter)
 
