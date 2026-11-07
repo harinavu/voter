@@ -11,6 +11,66 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+
+  <!-- ═══ LOGIN OVERLAY ══════════════════════════════════════════════════ -->
+  <div id="loginOverlay" class="login-overlay" style="display:none">
+    <div class="login-card">
+
+      <div class="login-logo">
+        <div class="login-logo-icon">🗳️</div>
+        <h2 class="login-title">శాఖవరం ఓటరు జాబితా</h2>
+        <p class="login-subtitle">Sakhavaram Gram Panchayat — 2026</p>
+      </div>
+
+      <div class="login-divider"></div>
+
+      <form id="loginForm" autocomplete="off" novalidate>
+        <div class="login-field">
+          <label class="login-label" for="loginUsername">Username</label>
+          <div class="login-input-wrap">
+            <span class="login-input-icon">👤</span>
+            <input
+              type="text"
+              id="loginUsername"
+              class="login-input"
+              placeholder="Enter username"
+              autocomplete="username"
+              spellcheck="false"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="login-field">
+          <label class="login-label" for="loginPassword">Password</label>
+          <div class="login-input-wrap">
+            <span class="login-input-icon">🔑</span>
+            <input
+              type="password"
+              id="loginPassword"
+              class="login-input"
+              placeholder="Enter password"
+              autocomplete="current-password"
+              required
+            />
+            <button type="button" class="toggle-pass-btn" id="togglePassword" title="Show/hide password">👁</button>
+          </div>
+        </div>
+
+        <div class="login-error" id="loginError">
+          ⚠️ Incorrect username or password
+        </div>
+
+        <button type="submit" class="login-btn" id="loginBtn">
+          <span id="loginSpinner" class="login-spinner" style="display:none"></span>
+          <span id="loginBtnText">Sign In →</span>
+        </button>
+      </form>
+
+      <p class="login-footer">Official use only &bull; Authorised personnel</p>
+    </div>
+  </div>
+  <!-- ════════════════════════════════════════════════════════════════════ -->
   <!-- Background decorations -->
   <div class="bg-orb bg-orb-1"></div>
   <div class="bg-orb bg-orb-2"></div>
@@ -31,6 +91,9 @@
           <span class="stat-num" id="totalVotersCount">—</span>
           <span class="stat-label">Total Voters</span>
         </div>
+        <button class="logout-btn" id="logoutBtn" onclick="logoutUser()" style="display:none" title="Sign out">
+          <span>⎋</span> Sign out
+        </button>
       </div>
     </div>
   </header>
@@ -186,6 +249,7 @@
     <p>Data sourced from official voter list &bull; For official use</p>
   </footer>
 
+  <script src="auth.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
