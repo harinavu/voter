@@ -81,7 +81,7 @@ def telugu_to_display(text: str) -> str:
 
 
 def main():
-    input_file = "voters.json"
+    input_file = "voters_raw.json"
     output_file = "voters.json"
 
     print(f"Loading {input_file} …")
