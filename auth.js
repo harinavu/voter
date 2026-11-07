@@ -10,7 +10,7 @@
 
 // ── CONFIG ────────────────────────────────────────────────────────────────────
 const AUTH_USERNAME      = 'harinavu999';
-const AUTH_PASSWORD_HASH = '3e8d74c00a8d90e9a23ffe1ab093c7576c971c76f06d6d22c3b42b0fb9ea65ee';
+const AUTH_PASSWORD_HASH = 'c83c0bc6224a7674767282036fa38342d87014b7f4eff964bb6a62559af90d1b';
 const SESSION_KEY        = 'voter_auth_session';
 const SESSION_DURATION   = 8 * 60 * 60 * 1000; // 8 hours in ms
 
