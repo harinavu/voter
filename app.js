@@ -68,6 +68,33 @@ function normalizeText(str) {
   return (str || '').toLowerCase().trim();
 }
 
+/**
+ * Returns true if the query (English or Telugu) matches any searchable field.
+ * English queries are matched against transliterated fields (voter_name_en, relation_name_en).
+ * Telugu/non-ASCII queries are matched against original fields.
+ */
+function voterMatchesQuery(v, query) {
+  if (!query) return true;
+
+  // Always search original Telugu fields (voter_id, house_number, serial numbers)
+  const teluguFields = [
+    v.voter_name, v.voter_id, v.relation_name,
+    v.house_number, v.full_serial, v.part_serial
+  ].map(normalizeText).join(' ');
+
+  if (teluguFields.includes(query)) return true;
+
+  // Also search English transliterated fields (supports typing English names)
+  const englishFields = [
+    v.voter_name_en || '',
+    v.relation_name_en || ''
+  ].map(normalizeText).join(' ');
+
+  if (englishFields.includes(query)) return true;
+
+  return false;
+}
+
 function runSearch() {
   const query = normalizeText(searchInput.value);
   const ageMin = parseInt(ageMinInput.value) || 0;
@@ -94,14 +121,8 @@ function runSearch() {
       const age = parseInt(v.age) || 0;
       if (age < ageMin || age > ageMax) return false;
 
-      // Text search
-      if (query) {
-        const fields = [
-          v.voter_name, v.voter_id, v.relation_name,
-          v.house_number, v.full_serial, v.part_serial
-        ].map(normalizeText).join(' ');
-        if (!fields.includes(query)) return false;
-      }
+      // Text search (Telugu + English transliteration)
+      if (query && !voterMatchesQuery(v, query)) return false;
 
       return true;
     });
@@ -141,6 +162,10 @@ function renderResults(query = '') {
   });
 
   renderPagination(totalPages);
+}
+
+function toTitleCase(str) {
+  return str.replace(/\b\w/g, c => c.toUpperCase());
 }
 
 function getInitial(name) {
@@ -283,6 +308,15 @@ function openModal(voter) {
   modalAvatar.className = `modal-avatar ${avatarClass}`;
   modalName.textContent = voter.voter_name || '—';
   modalId.textContent = voter.voter_id || '—';
+
+  // Show English transliteration subtitle in modal (first variant only)
+  const modalNameEn = document.getElementById('modalNameEn');
+  if (modalNameEn) {
+    const enVariants = (voter.voter_name_en || '').split(' ');
+    // Pick the longest continuous word-group that resembles the first transliteration
+    const firstVariant = (voter.voter_name_en || '').split(' ').slice(0, 3).join(' ');
+    modalNameEn.textContent = firstVariant ? `(${toTitleCase(firstVariant)})` : '';
+  }
 
   dVoterId.textContent = voter.voter_id || '—';
   dSerial.textContent = voter.full_serial || '—';
